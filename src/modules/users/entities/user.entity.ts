@@ -1,14 +1,15 @@
-import { $Enums, User } from '@prisma/client';
-import { Exclude } from 'class-transformer';
-
-export class UserEntity implements User {
+import { $Enums, Prisma } from '@prisma/client';
+export class UserEntity {
   id: number;
   name: string;
   email: string;
-  @Exclude()
-  password: string;
   role: $Enums.Role;
   isVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
+export const userSelect: Prisma.UserSelect = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  isVerified: true,
+};
