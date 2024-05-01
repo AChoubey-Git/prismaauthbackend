@@ -24,6 +24,15 @@ model User {
   updatedAt  DateTime @updatedAt
 }
 
+model Userotp {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  otp        String
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 enum Role {
   USER
   ADMIN

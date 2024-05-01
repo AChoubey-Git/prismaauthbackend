@@ -14,14 +14,33 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { MailService } from 'src/utils/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  private port: number;
+  constructor(
+    private readonly usersService: UsersService,
+    private _mailService: MailService,
+    private _cofigService: ConfigService,
+  ) {
+    this.port = this._cofigService.get('port');
+  }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const { email } = createUserDto;
+    const verifiedUser = await this._mailService.findOne({ email });
+    if (verifiedUser && verifiedUser?.isVerified) {
+      return this.usersService.create({ ...createUserDto, isVerified: true });
+    }
+    const res = await this._mailService.sendVerificationEmail(email);
+    return {
+      message: `Verify your ${email} by clicking the bellow verify-otp url`,
+      verify_otp: `http://localhost:${this.port}/auth/verify-otp?email=${email}&otp=${res.otp}`,
+      preview_email: res.preview_email,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -39,19 +58,44 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(+id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    try {
+      const user = await this.usersService.findOne({ id: +id });
+      if (user) {
+        return { status: true, user };
+      }
+      return { status: false, message: 'userId not found' };
+    } catch (error) {
+      return error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.usersService.update(+id, updateUserDto);
+      if (user) {
+        return { status: true, user };
+      }
+      return { status: false, message: 'userId not found' };
+    } catch (error) {
+      return error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      const user = await this.usersService.findOne({ id: +id });
+      if (user) {
+        await this.usersService.remove(+id);
+        return { status: true, message: 'Successfuly deleted' };
+      }
+      return { status: false, message: 'userId not available' };
+    } catch (error) {
+      return error;
+    }
   }
 }

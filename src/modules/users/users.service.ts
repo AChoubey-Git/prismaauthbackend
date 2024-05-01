@@ -21,13 +21,15 @@ export class UsersService {
       this.roundsOfHashing,
     );
     createUserDto.password = hashedPassword;
-    return this._prismaService.user.create({ data: createUserDto });
-    // verify email send to the registered email id.
+    return this._prismaService.user.create({
+      data: createUserDto,
+      select: userSelect,
+    });
   }
 
-  async findOne(id: number) {
+  async findOne(query) {
     return this._prismaService.user.findUnique({
-      where: { id },
+      where: query,
       select: userSelect,
     });
   }
