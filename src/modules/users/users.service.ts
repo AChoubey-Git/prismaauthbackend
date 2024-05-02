@@ -27,7 +27,7 @@ export class UsersService {
     });
   }
 
-  async findOne(query: { id: number }) {
+  async findOne(query: { id: number } | { email: string }) {
     return this._prismaService.user.findUnique({
       where: query,
       select: userSelect,

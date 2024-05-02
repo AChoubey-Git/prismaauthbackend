@@ -33,7 +33,22 @@ export class UsersController {
     const { email } = createUserDto;
     const verifiedUser = await this._mailService.findOne({ email });
     if (verifiedUser && verifiedUser?.isVerified) {
-      return this.usersService.create({ ...createUserDto, isVerified: true });
+      const user = await this.usersService.findOne({ email });
+      if (!user) {
+        const newUser = await this.usersService.create({
+          ...createUserDto,
+          isVerified: true,
+        });
+        return {
+          status: true,
+          message: 'Successfully created',
+          user: newUser,
+        };
+      }
+      return {
+        status: false,
+        message: `${email}already exists`,
+      };
     }
     const res = await this._mailService.sendVerificationEmail(email);
     return {
