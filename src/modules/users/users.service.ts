@@ -27,7 +27,7 @@ export class UsersService {
     });
   }
 
-  async findOne(query) {
+  async findOne(query: { id: number }) {
     return this._prismaService.user.findUnique({
       where: query,
       select: userSelect,

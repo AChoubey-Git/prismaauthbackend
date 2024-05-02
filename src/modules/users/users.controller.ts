@@ -51,9 +51,17 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateMe(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+  async updateMe(@Req() req, @Body() updateUserDto: UpdateUserDto) {
     const { id } = req.user;
-    return this.usersService.update(+id, updateUserDto);
+    try {
+      const user = await this.usersService.update(+id, updateUserDto);
+      if (user) {
+        return { status: true, user };
+      }
+      return { status: false, message: 'userId not found' };
+    } catch (error) {
+      return error.message;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,7 +74,7 @@ export class UsersController {
       }
       return { status: false, message: 'userId not found' };
     } catch (error) {
-      return error;
+      return error.message;
     }
   }
 
@@ -80,7 +88,7 @@ export class UsersController {
       }
       return { status: false, message: 'userId not found' };
     } catch (error) {
-      return error;
+      return error.message;
     }
   }
 
@@ -95,7 +103,7 @@ export class UsersController {
       }
       return { status: false, message: 'userId not available' };
     } catch (error) {
-      return error;
+      return error.message;
     }
   }
 }

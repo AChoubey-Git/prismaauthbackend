@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { MailService } from 'src/utils/mail/mail.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -28,10 +36,12 @@ export class AuthController {
     try {
       const isVerified = await this._mailService.verifyOtp(query);
       if (isVerified) {
+        // In postgresql we don't have any option for ttl.
+        // if we used mongodb we can use ttl with 5 min duration, then the otp will be available for 5 min only.
         await this._mailService.update({ isVerified, ...query });
         return {
           status: true,
-          message: 'You have successfully verified your email id',
+          message: 'You have successfully verified your email_id',
         };
       }
       return {
