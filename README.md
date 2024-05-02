@@ -40,13 +40,13 @@ $ cp .env.example .env
 
 ## Setup PostgreSQL database
 
-# Docker :
+**Docker** :
 
 - Start a PostgreSQL database with docker using: `docker-compose up -d`
 
-# Local setup :
+**Local setup** :
 
-- If you have a local instance of PostgreSQL running, you can skip this step. In this case, you will need to change the `DATABASE_URL` inside the `.env` file with a valid [PostgreSQL connection string](https://www.prisma.io/docs/concepts/database-connectors/postgresql#connection-details) for your database.
+- If you have a local instance of PostgreSQL running, you can skip docker setup step. In this case, you will need to change the `DATABASE_URL` inside the `.env` file with a valid [PostgreSQL connection string](https://www.prisma.io/docs/concepts/database-connectors/postgresql#connection-details) for your database.
 
 ## Database migration :
 
